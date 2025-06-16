@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Trivial Pursuit</string>
+    <string name="regles_du_jeu">1. Le jeu se joue à 2 joueurs ou plus\n\n
+2. À chaque tour, une question est posée\n\n
+3. Une bonne réponse permet de gagner un point et la catégorie\n\n
+4. Le premier joueur à gagner toutes les catégories gagne la partie\n\n
+5. Les catégories sont :\n
+   • Géographie\n
+   • Histoire\n
+   • Divertissement\n
+   • Art et Littérature\n
+   • Sciences et Nature\n
+   • Sports et Loisirs</string>
+</resources>
