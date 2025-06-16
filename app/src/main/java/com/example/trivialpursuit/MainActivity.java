@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         Button btnRegles = findViewById(R.id.btnRegles);
 
         btnNouvellePartie.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, GameActivity.class);
+            Intent intent = new Intent(MainActivity.this, PlayerRegistrationActivity.class);
             startActivity(intent);
         });
 

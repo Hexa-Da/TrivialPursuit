@@ -1,7 +1,12 @@
 package com.example.trivialpursuit;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -9,14 +14,21 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class GameActivity extends AppCompatActivity {
     private Jeu jeu;
     private TextView tvJoueurActuel;
     private TextView tvCategorie;
     private TextView tvQuestion;
-    private RadioGroup rgReponses;
+    private EditText etReponse;
     private Button btnValider;
     private Question questionActuelle;
+    private List<String> categoriesDisponibles;
+    private boolean premierTour = true;
+    private LinearLayout containerScores;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,14 +39,33 @@ public class GameActivity extends AppCompatActivity {
         tvJoueurActuel = findViewById(R.id.tvJoueurActuel);
         tvCategorie = findViewById(R.id.tvCategorie);
         tvQuestion = findViewById(R.id.tvQuestion);
-        rgReponses = findViewById(R.id.rgReponses);
+        etReponse = findViewById(R.id.etReponse);
         btnValider = findViewById(R.id.btnValider);
+        containerScores = findViewById(R.id.containerScores);
 
         // Initialisation du jeu
         jeu = new Jeu();
-        // Ajouter des joueurs de test
-        jeu.ajouterJoueur(new Joueur("Joueur 1"));
-        jeu.ajouterJoueur(new Joueur("Joueur 2"));
+        categoriesDisponibles = new ArrayList<>();
+
+        // Récupération des noms des joueurs
+        String[] nomsJoueurs = getIntent().getStringArrayExtra("NOMS_JOUEURS");
+        if (nomsJoueurs != null) {
+            for (String nom : nomsJoueurs) {
+                jeu.ajouterJoueur(new Joueur(nom));
+            }
+        }
+
+        // Réinitialiser les catégories disponibles
+        resetCategoriesDisponibles();
+
+        // Si plus d'un joueur, récupérer le premier joueur
+        if (jeu.getNombreJoueurs() > 1) {
+            int premierJoueur = getIntent().getIntExtra("PREMIER_JOUEUR", 0);
+            jeu.setJoueurActuel(premierJoueur);
+        }
+
+        // Initialiser l'affichage des scores
+        initialiserScores();
 
         // Afficher la première question
         afficherQuestionAleatoire();
@@ -43,52 +74,136 @@ public class GameActivity extends AppCompatActivity {
         btnValider.setOnClickListener(v -> validerReponse());
     }
 
-    private void afficherQuestionAleatoire() {
-        String[] categories = jeu.getCategories();
-        String categorieAleatoire = categories[(int) (Math.random() * categories.length)];
-        questionActuelle = jeu.getQuestionAleatoire(categorieAleatoire);
+    private void initialiserScores() {
+        containerScores.removeAllViews();
+        for (Joueur joueur : jeu.getJoueurs()) {
+            LinearLayout joueurLayout = new LinearLayout(this);
+            joueurLayout.setOrientation(LinearLayout.HORIZONTAL);
+            joueurLayout.setPadding(0, 8, 0, 8);
 
-        if (questionActuelle != null) {
-            tvJoueurActuel.setText("Joueur actuel: " + jeu.getJoueurActuel().getNom());
-            tvCategorie.setText("Catégorie: " + questionActuelle.getCategorie());
-            tvQuestion.setText(questionActuelle.getQuestion());
+            TextView tvNom = new TextView(this);
+            tvNom.setText(joueur.getNom() + " : ");
+            tvNom.setTextSize(16);
+            joueurLayout.addView(tvNom);
 
-            String[] reponses = questionActuelle.getReponses();
-            for (int i = 0; i < reponses.length; i++) {
-                RadioButton rb = (RadioButton) rgReponses.getChildAt(i);
-                rb.setText(reponses[i]);
+            // Ajouter les points de couleur pour chaque catégorie gagnée
+            for (String categorie : joueur.getCategoriesGagnees()) {
+                TextView tvPoint = new TextView(this);
+                tvPoint.setText("●");
+                tvPoint.setTextSize(20);
+                tvPoint.setTextColor(getCouleurCategorie(categorie));
+                tvPoint.setPadding(4, 0, 4, 0);
+                joueurLayout.addView(tvPoint);
             }
+
+            containerScores.addView(joueurLayout);
         }
     }
 
+    private int getCouleurCategorie(String categorie) {
+        switch (categorie) {
+            case "Géographie": return Categorie.GEOGRAPHIE.getCouleur();
+            case "Histoire": return Categorie.HISTOIRE.getCouleur();
+            case "Divertissement": return Categorie.DIVERTISSEMENT.getCouleur();
+            case "Art et Littérature": return Categorie.ART_LITTERATURE.getCouleur();
+            case "Sciences et Nature": return Categorie.SCIENCES_NATURE.getCouleur();
+            case "Sports et Loisirs": return Categorie.SPORTS_LOISIRS.getCouleur();
+            default: return 0xFF000000; // Noir par défaut
+        }
+    }
+
+    private void mettreAJourScores() {
+        containerScores.removeAllViews();
+        initialiserScores();
+    }
+
+    private void resetCategoriesDisponibles() {
+        categoriesDisponibles.clear();
+        for (String categorie : jeu.getCategories()) {
+            categoriesDisponibles.add(categorie);
+        }
+    }
+
+    private void afficherQuestionAleatoire() {
+        Joueur joueurActuel = jeu.getJoueurActuel();
+        String[] categoriesDisponibles = jeu.getCategoriesDisponibles(joueurActuel);
+        
+        if (categoriesDisponibles.length == 0) {
+            // Le joueur actuel a gagné toutes les catégories
+            afficherResultats();
+            return;
+        }
+
+        if (jeu.toutesQuestionsUtilisees()) {
+            // Toutes les questions ont été posées, afficher les résultats
+            afficherResultats();
+            return;
+        }
+
+        // Sélectionner une catégorie aléatoire parmi les disponibles
+        Random random = new Random();
+        String categorieAleatoire = categoriesDisponibles[random.nextInt(categoriesDisponibles.length)];
+        
+        questionActuelle = jeu.getQuestionAleatoire(categorieAleatoire);
+
+        if (questionActuelle != null) {
+            tvJoueurActuel.setText("C'est au tour de : " + joueurActuel.getNom());
+            tvCategorie.setText("Catégorie : " + questionActuelle.getCategorie());
+            tvQuestion.setText(questionActuelle.getQuestion());
+            etReponse.setText(""); // Réinitialiser le champ de réponse
+        }
+    }
+
+    private void afficherResultats() {
+        Intent intent = new Intent(this, GameResultsActivity.class);
+        Joueur gagnant = jeu.getJoueurActuel();
+        intent.putExtra("GAGNANT", gagnant.getNom());
+        startActivity(intent);
+        finish();
+    }
+
+    private String[] getNomsJoueurs() {
+        String[] noms = new String[jeu.getJoueurs().size()];
+        for (int i = 0; i < noms.length; i++) {
+            noms[i] = jeu.getJoueurs().get(i).getNom();
+        }
+        return noms;
+    }
+
     private void validerReponse() {
-        int selectedId = rgReponses.getCheckedRadioButtonId();
-        if (selectedId == -1) {
-            Toast.makeText(this, "Veuillez sélectionner une réponse", Toast.LENGTH_SHORT).show();
+        String reponseJoueur = etReponse.getText().toString().trim();
+        if (reponseJoueur.isEmpty()) {
+            Toast.makeText(this, "Veuillez entrer une réponse", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        RadioButton selectedRadioButton = findViewById(selectedId);
-        int reponseIndex = rgReponses.indexOfChild(selectedRadioButton);
+        Joueur joueurActuel = jeu.getJoueurActuel();
+        boolean bonneReponse = jeu.verifierReponse(questionActuelle, reponseJoueur);
 
-        if (jeu.verifierReponse(questionActuelle, reponseIndex)) {
-            Toast.makeText(this, "Bonne réponse !", Toast.LENGTH_SHORT).show();
-            jeu.getJoueurActuel().ajouterPoints(1);
-            jeu.getJoueurActuel().ajouterCategorie(questionActuelle.getCategorie());
-        } else {
-            Toast.makeText(this, "Mauvaise réponse !", Toast.LENGTH_SHORT).show();
+        // Afficher la bonne réponse dans tous les cas
+        String message = bonneReponse ? 
+            "Bonne réponse !" : 
+            "Mauvaise réponse. La bonne réponse était : " + questionActuelle.getReponse();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+
+        if (bonneReponse) {
+            joueurActuel.ajouterCategorie(questionActuelle.getCategorie());
+            mettreAJourScores();
+
+            // Vérifier si le joueur a gagné
+            if (jeu.joueurAGagne(joueurActuel)) {
+                Toast.makeText(this, joueurActuel.getNom() + " a gagné !", Toast.LENGTH_LONG).show();
+                afficherResultats();
+                return;
+            }
         }
 
-        // Vérifier si le joueur a gagné
-        if (jeu.getJoueurActuel().aGagneToutesCategories()) {
-            Toast.makeText(this, jeu.getJoueurActuel().getNom() + " a gagné !", Toast.LENGTH_LONG).show();
-            finish();
-            return;
+        // Passer au joueur suivant seulement s'il y a plus d'un joueur
+        if (jeu.getNombreJoueurs() > 1) {
+            jeu.passerAuJoueurSuivant();
         }
-
-        // Passer au joueur suivant
-        jeu.passerAuJoueurSuivant();
-        rgReponses.clearCheck();
+        
+        // Afficher la prochaine question
         afficherQuestionAleatoire();
     }
 } 

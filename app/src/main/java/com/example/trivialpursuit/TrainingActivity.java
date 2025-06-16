@@ -2,8 +2,7 @@ package com.example.trivialpursuit;
 
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -13,7 +12,7 @@ public class TrainingActivity extends AppCompatActivity {
     private Jeu jeu;
     private TextView tvCategorie;
     private TextView tvQuestion;
-    private RadioGroup rgReponses;
+    private EditText etReponse;
     private TextView tvScore;
     private Button btnValider;
     private Button btnRetour;
@@ -32,7 +31,7 @@ public class TrainingActivity extends AppCompatActivity {
         // Initialisation des vues
         tvCategorie = findViewById(R.id.tvCategorie);
         tvQuestion = findViewById(R.id.tvQuestion);
-        rgReponses = findViewById(R.id.rgReponses);
+        etReponse = findViewById(R.id.etReponse);
         tvScore = findViewById(R.id.tvScore);
         btnValider = findViewById(R.id.btnValider);
         btnRetour = findViewById(R.id.btnRetour);
@@ -56,12 +55,7 @@ public class TrainingActivity extends AppCompatActivity {
 
         if (questionActuelle != null) {
             tvQuestion.setText(questionActuelle.getQuestion());
-
-            String[] reponses = questionActuelle.getReponses();
-            for (int i = 0; i < reponses.length; i++) {
-                RadioButton rb = (RadioButton) rgReponses.getChildAt(i);
-                rb.setText(reponses[i]);
-            }
+            etReponse.setText(""); // Réinitialiser le champ de réponse
         } else {
             Toast.makeText(this, "Aucune question disponible pour cette catégorie", Toast.LENGTH_SHORT).show();
             finish();
@@ -69,25 +63,26 @@ public class TrainingActivity extends AppCompatActivity {
     }
 
     private void validerReponse() {
-        int selectedId = rgReponses.getCheckedRadioButtonId();
-        if (selectedId == -1) {
-            Toast.makeText(this, "Veuillez sélectionner une réponse", Toast.LENGTH_SHORT).show();
+        String reponseJoueur = etReponse.getText().toString().trim();
+        if (reponseJoueur.isEmpty()) {
+            Toast.makeText(this, "Veuillez entrer une réponse", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        RadioButton selectedRadioButton = findViewById(selectedId);
-        int reponseIndex = rgReponses.indexOfChild(selectedRadioButton);
+        boolean bonneReponse = jeu.verifierReponse(questionActuelle, reponseJoueur);
 
-        if (jeu.verifierReponse(questionActuelle, reponseIndex)) {
-            Toast.makeText(this, "Bonne réponse !", Toast.LENGTH_SHORT).show();
+        // Afficher la bonne réponse dans tous les cas
+        String message = bonneReponse ? 
+            "Bonne réponse !" : 
+            "Mauvaise réponse. La bonne réponse était : " + questionActuelle.getReponse();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+
+        if (bonneReponse) {
             score++;
             tvScore.setText("Score: " + score);
-        } else {
-            Toast.makeText(this, "Mauvaise réponse !", Toast.LENGTH_SHORT).show();
         }
 
-        // Passer à la question suivante
-        rgReponses.clearCheck();
+        // Afficher la prochaine question
         afficherQuestionAleatoire();
     }
 } 

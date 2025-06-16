@@ -33,6 +33,15 @@
         <activity
             android:name=".TrainingActivity"
             android:exported="false" />
+        <activity
+            android:name=".PlayerRegistrationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DiceRollActivity"
+            android:exported="false" />
+        <activity
+            android:name=".GameResultsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
