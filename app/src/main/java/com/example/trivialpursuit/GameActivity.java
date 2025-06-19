@@ -134,12 +134,6 @@ public class GameActivity extends AppCompatActivity {
             return;
         }
 
-        if (jeu.toutesQuestionsUtilisees()) {
-            // Toutes les questions ont été posées, afficher les résultats
-            afficherResultats();
-            return;
-        }
-
         // Sélectionner une catégorie aléatoire parmi les disponibles
         Random random = new Random();
         String categorieAleatoire = categoriesDisponibles[random.nextInt(categoriesDisponibles.length)];
@@ -156,8 +150,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void afficherResultats() {
         Intent intent = new Intent(this, GameResultsActivity.class);
-        Joueur gagnant = jeu.getJoueurActuel();
-        intent.putExtra("GAGNANT", gagnant.getNom());
+        intent.putExtra("JOUEURS", new ArrayList<>(jeu.getJoueurs()));
         startActivity(intent);
         finish();
     }
@@ -186,7 +179,8 @@ public class GameActivity extends AppCompatActivity {
             "Mauvaise réponse. La bonne réponse était : " + questionActuelle.getReponse();
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 
-        if (bonneReponse) {
+        // Ajouter la catégorie seulement si la réponse est correcte et que la catégorie n'est pas déjà gagnée
+        if (bonneReponse && !jeu.categorieDejaGagnee(questionActuelle.getCategorie(), joueurActuel)) {
             joueurActuel.ajouterCategorie(questionActuelle.getCategorie());
             mettreAJourScores();
 

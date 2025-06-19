@@ -4,21 +4,40 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="16dp">
+    android:padding="24dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Fin de la partie"
-        android:textSize="32sp"
+        android:text="🏆 Résultats 🏆"
+        android:textSize="28sp"
         android:textStyle="bold"
+        android:textColor="#FFD700"
         android:layout_marginBottom="32dp"/>
 
     <LinearLayout
-        android:id="@+id/containerResultat"
-        android:layout_width="match_parent"
+        android:id="@+id/containerResultats"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"/>
+
+    <Button
+        android:id="@+id/btnNouvellePartie"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nouvelle Partie"
+        android:layout_marginTop="32dp"
+        android:padding="16dp"
+        android:textSize="18sp"/>
+
+    <Button
+        android:id="@+id/btnRetourMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Retour au Menu"
+        android:layout_marginTop="8dp"
+        android:padding="16dp"
+        android:textSize="18sp"/>
 
 </LinearLayout> 

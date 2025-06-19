@@ -137,7 +137,7 @@ public class Jeu {
             new Question("Quel est le plus grand insecte du monde ?", "Phasme géant", "Sciences et Nature"),
             new Question("Quelle est la constante de gravitation universelle ?", "6.67 x 10^-11", "Sciences et Nature"),
             new Question("Quel est le plus grand arbre du monde ?", "Séquoia géant", "Sciences et Nature"),
-            new Question("Quelle est la formule de l'ADN ?", "Double hélice", "Sciences et Nature"),
+            new Question("Quelle est la forme de l'ADN ?", "Double hélice", "Sciences et Nature"),
             new Question("Quel est le plus grand mammifère marin ?", "Baleine bleue", "Sciences et Nature"),
             new Question("Quelle est la constante de Planck ?", "6.63 x 10^-34", "Sciences et Nature"),
             new Question("Quel est le plus grand dinosaure connu ?", "Argentinosaurus", "Sciences et Nature"),
@@ -154,9 +154,9 @@ public class Jeu {
             new Question("Quel est le plus grand stade du monde ?", "Stade de Pyongyang", "Sports et Loisirs"),
             new Question("Qui a remporté le plus de médailles d'or olympiques ?", "Michael Phelps", "Sports et Loisirs"),
             new Question("Quel est le sport national du Japon ?", "Sumo", "Sports et Loisirs"),
-            new Question("Qui a remporté le plus de Tours de France ?", "Eddy Merckx", "Sports et Loisirs"),
+            new Question("Qui a remporté le plus de Tours de France ?", "Eddy Merckx, Jacques Anquetil, Bernard Hinault ou Miguel Indurain", "Sports et Loisirs"),
             new Question("Quel est le plus grand circuit de Formule 1 ?", "Circuit de Spa-Francorchamps", "Sports et Loisirs"),
-            new Question("Qui a remporté le plus de titres NBA ?", "Bill Russell", "Sports et Loisirs"),
+            new Question("Quel joueur a remporté le plus de titres NBA ?", "Bill Russell", "Sports et Loisirs"),
             new Question("Quel est le plus grand tournoi de tennis ?", "Wimbledon", "Sports et Loisirs"),
             new Question("Qui a remporté le plus de titres de champion du monde de boxe ?", "Manny Pacquiao", "Sports et Loisirs"),
             new Question("Quel est le plus grand marathon du monde ?", "Marathon de New York", "Sports et Loisirs"),
@@ -164,7 +164,7 @@ public class Jeu {
             new Question("Quel est le plus grand stade de baseball ?", "Yankee Stadium", "Sports et Loisirs"),
             new Question("Qui a remporté le plus de titres de champion du monde d'échecs ?", "Garry Kasparov", "Sports et Loisirs"),
             new Question("Quel est le plus grand tournoi de poker ?", "World Series of Poker", "Sports et Loisirs"),
-            new Question("Qui a remporté le plus de titres de champion du monde de Formule 1 ?", "Lewis Hamilton", "Sports et Loisirs"),
+            new Question("Quel est le record du monde du 100m en athlétisme ?", "9.58 secondes", "Sports et Loisirs"),
             new Question("Quel est le plus grand stade de cricket ?", "Melbourne Cricket Ground", "Sports et Loisirs"),
             new Question("Qui a remporté le plus de titres de champion du monde de rugby ?", "Nouvelle-Zélande", "Sports et Loisirs"),
             new Question("Quel est le plus grand tournoi de badminton ?", "All England Open", "Sports et Loisirs")
@@ -233,7 +233,12 @@ public class Jeu {
     }
 
     public boolean toutesQuestionsUtilisees() {
-        return questionsUtilisees.size() == questions.size();
+        // Calculer le nombre total de questions dans toutes les catégories
+        int nombreTotalQuestions = 0;
+        for (List<Question> questionsCategorie : questions.values()) {
+            nombreTotalQuestions += questionsCategorie.size();
+        }
+        return questionsUtilisees.size() == nombreTotalQuestions;
     }
 
     public boolean categorieDejaGagnee(String categorie, Joueur joueur) {

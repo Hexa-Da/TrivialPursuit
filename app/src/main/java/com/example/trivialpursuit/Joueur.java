@@ -1,9 +1,10 @@
 package com.example.trivialpursuit;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Joueur {
+public class Joueur implements Serializable {
     private String nom;
     private int score;
     private List<String> categoriesGagnees;
